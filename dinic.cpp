@@ -13,17 +13,19 @@ struct Edge{
 	Edge(){}
 };
 
-template<typename T,int M>
+template<typename T>
 struct Dinic{
 	int n,m,s,t;
 	using E = Edge<T>;
 	vector<E> edges;
-	vector<int> G[M];
-	int level[M];
+	vector<vector<int>> G;
+	vector<int> level;
 	T INF = numeric_limits<T>::max()/2;
 
-	void init(int n_=M){
+	void init(int n_){
 		n = n_;
+		G.resize(n);
+		level.resize(n);
 		for (int i = 0; i < n; ++i) G[i].clear();
 		edges.clear();
 	}
@@ -35,7 +37,7 @@ struct Dinic{
 		G[to].push_back(m-1);
 	}
 	bool bfs(){
-		memset(level,0,sizeof(level));
+		memset(level.data(),0,sizeof(int)*level.size());
 		queue<int> q; q.push(s); level[s] = 1;
 		while(q.size()){
 			int tmp = q.front(); q.pop();
@@ -77,10 +79,10 @@ struct Dinic{
 };
 
 void solve(){
-	Dinic<ll,MAXN> dinic;
+	Dinic<ll> dinic;
 	int n,m,s,t;
-	dinic.init();
 	cin >> n >> m >> s >> t;
+	dinic.init(n+1);
 	for (int i = 0; i < m; ++i){ 
 		int a,b,c;  cin>> a >> b >> c;
 		dinic.addEdge(a, b, c);
