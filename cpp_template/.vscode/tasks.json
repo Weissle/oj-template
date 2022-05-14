@@ -6,6 +6,9 @@
             "command": "/usr/bin/g++",
             "args": [
                 "-g",
+                "-std=c++17",
+                "-D",
+                "LOCAL",
                 "${file}",
                 "-o",
                 "a.out"
