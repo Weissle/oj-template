@@ -1,3 +1,7 @@
+/* 
+ * author: {$username$}
+ * created: {$OJT_NOW_TIME$}
+ */
 #include <bits/stdc++.h>
 
 #ifdef LOCAL
