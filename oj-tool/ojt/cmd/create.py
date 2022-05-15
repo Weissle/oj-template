@@ -53,6 +53,8 @@ def Create(args,cfg):
         mp[para] = cfg[lp]
 
     src_dir = mp['template']
+    if '~' in src_dir:
+        src_dir = os.path.expanduser(src_dir)
     main_file = src_dir + '/' + mp['src']
     if not os.path.exists(src_dir):
         print(f'{src_dir} does not exist.')

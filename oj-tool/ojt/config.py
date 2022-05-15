@@ -1,6 +1,8 @@
 import os
 
 def ConfigRead(cfg_path) :
+    if '~' in cfg_path:
+        cfg_path = os.path.expanduser(cfg_path)
     if not os.path.exists(cfg_path):
         return None
     file = open(cfg_path, 'r')
