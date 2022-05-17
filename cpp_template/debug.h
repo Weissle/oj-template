@@ -10,7 +10,7 @@ inline string to_string(string s) { return '"' + s + '"'; }
 inline string to_string(const char *s) { return to_string(string(s)); }
 
 template<typename A, typename B>
-string to_string(pair<A, B> p) { return "<" + to_string(p.first) + ", " + to_string(p.second) + ">"; }
+string to_string(pair<A, B> p) { return "<" + to_string(p.first) + "," + to_string(p.second) + ">"; }
 
 inline string to_string(bool b) { return (b ? "true" : "false"); }
 
