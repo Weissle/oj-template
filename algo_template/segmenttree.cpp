@@ -33,11 +33,17 @@ struct SegmentTree{
 	using SNode = SegmentTreeNode<T,default_val>;
 	vector<SNode> p;
 	int n,num,left,right;
-	SegmentTree(int left_,int right_,int node_num){ 
-		left = left_; right = right_;
+	function<void(T&,T)> update_val_policy;
+	function<T(int ,T)> update_lazy_policy;
+	function<void(T&,T)> query_val_policy;
+	function<T(int ,T)> query_lazy_policy;
+	SegmentTree(int left_,int right_,int node_num, function<void(T&, T)> update_val_policy_, 
+			function<void(T&, T)> query_val_policy_, function<T(int, T)> query_lazy_policy_ ):
+		left(left_), right(right_), update_val_policy(update_val_policy_),query_val_policy(query_val_policy_), query_lazy_policy(query_lazy_policy_)
+	{ 
 		p.resize(node_num);
 		num=1;
-		p[0] = SNode(left,right);
+		p[0] = SNode(left_,right_);
 	}
 
 	void update(int idx, int val){
@@ -62,7 +68,7 @@ private:
 				node.lazy=true;
 				node.lazy_val = default_val;
 			}
-			node.lazy_val += val;
+			update_val_policy(node.lazy_val, val);
 			return;
 		}
 		if(node.lidx == -1){
@@ -80,7 +86,9 @@ private:
 		}
 		_update(l,r,val,node.lidx);
 		_update(l,r,val,node.ridx);
-		node.val = _query(rangel,ranger,node.lidx) + _query(rangel,ranger,node.ridx);
+		node.val = default_val;
+		update_val_policy(node.val,_query(rangel, ranger, node.lidx));
+		update_val_policy(node.val,_query(rangel, ranger, node.ridx));
 	}
 
 	T _query(ll l, ll r, int nidx){
@@ -88,22 +96,40 @@ private:
 		ll rangel =  node.l, ranger = node.r;
 		if(l > ranger || r < rangel) return default_val;
 		if(l <= rangel && r>=ranger) {
-			if(node.lazy==false) return node.val;
-			else return node.val + (node.r-node.l+1)*node.lazy_val;
+			if(node.lazy==false) {
+				debug(rangel,ranger,node.val);		
+				return node.val;
+			}
+			else { 
+				T ret = node.val;
+				query_val_policy(ret, query_lazy_policy(node.r-node.l+1,node.lazy_val));
+				debug(rangel,ranger,ret);		
+				return ret;
+			}
 		}
 		T ret=default_val;
 		assert(node.lidx != -1 && node.ridx!=-1);
-		ret += _query(l,r,node.lidx);
-		ret += _query(l,r,node.ridx);
+		query_val_policy(ret,_query(l,r,node.lidx));
+		query_val_policy(ret,_query(l,r,node.ridx));
 		if(node.lazy)
-			ret += (ranger-rangel+r-l-max(node.r,r)+min(node.l,l)+1)*node.lazy_val;
+			query_val_policy(ret, query_lazy_policy((ranger-rangel+r-l-max(node.r,r)+min(node.l,l)+1),node.lazy_val));
+		debug(rangel,ranger,ret);		
 		return ret;
 	}
 };
 
 void solve(){
 	cin >> n >> m;
-	SegmentTree<ll, 0ll> st(0,n-1,n<<2);
+	SegmentTree<ll, 0ll> st(0,n-1,n<<2,
+			[](ll &a, ll b){
+			a+=b;
+			},
+			[](ll &a, ll b){
+				a+= b;
+			},
+			[](int a, ll b)->ll{
+			return a*b;
+			});
 	for (int i = 0; i < n; ++i){ 
 		cin >> p[i];
 		st.update(i,p[i]);
@@ -111,7 +137,7 @@ void solve(){
 	for(int i=0;i<m;++i){
 		int op; cin >> op;
 		int x,y,k;
-		cin >> x>>y; --x;--y;
+		cin >> x >>y; --x;--y;
 		if(op==1){
 			cin >> k;
 			st.range_update(x,y,k);
